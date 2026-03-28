@@ -1,0 +1,80 @@
+{% extends 'core/base.html' %}
+{% block title %}Chat Support{% endblock %}
+{% block content %}
+<div class="page-title">💬 Chat Support</div>
+<div style="display:grid;grid-template-columns:1fr 280px;gap:20px;height:calc(100vh - 140px)">
+
+  <!-- Chat Window -->
+  <div class="card" style="display:flex;flex-direction:column;padding:0;overflow:hidden">
+    <div style="padding:15px 20px;border-bottom:1px solid var(--border);font-weight:600">
+      🤖 Agent Bot <span style="font-size:.75rem;color:var(--green);margin-left:8px">● Online</span>
+    </div>
+    <div id="chatBox" style="flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px">
+      <!-- existing messages -->
+      {% for m in messages %}
+      <div style="display:flex;{% if not m.is_bot %}justify-content:flex-end{% endif %}">
+        <div style="max-width:75%;padding:10px 14px;border-radius:{% if m.is_bot %}4px 14px 14px 14px{% else %}14px 4px 14px 14px{% endif %};background:{% if m.is_bot %}var(--surface){% else %}var(--accent){% endif %};font-size:.88rem;line-height:1.5">
+          {{ m.content }}
+          <div style="font-size:.7rem;color:rgba(255,255,255,.4);margin-top:4px">{{ m.created_at|date:"H:i" }}</div>
+        </div>
+      </div>
+      {% empty %}
+      <div style="text-align:center;color:var(--muted);margin-top:40px">
+        <div style="font-size:3rem">🤖</div>
+        <p style="margin-top:10px">Hi! I'm your support bot.<br>Ask me anything — I'll search the knowledge base for you.</p>
+      </div>
+      {% endfor %}
+    </div>
+    <div style="padding:15px;border-top:1px solid var(--border);display:flex;gap:10px">
+      <input type="text" id="msgInput" placeholder="Type your question…" style="flex:1" onkeydown="if(event.key==='Enter')sendMsg()">
+      <button class="btn" onclick="sendMsg()">Send</button>
+    </div>
+  </div>
+
+  <!-- Info Panel -->
+  <div style="display:flex;flex-direction:column;gap:15px">
+    <div class="card">
+      <h4 style="margin-bottom:12px;color:var(--muted);font-size:.82rem;text-transform:uppercase">How it works</h4>
+      <p style="font-size:.85rem;color:var(--text);line-height:1.6">The bot searches the <strong>Knowledge Base</strong> for your question. If no answer is found, a <strong>support ticket</strong> is automatically created for our team.</p>
+    </div>
+    <div class="card">
+      <h4 style="margin-bottom:12px;color:var(--muted);font-size:.82rem;text-transform:uppercase">Quick Questions</h4>
+      {% for entry in kb_suggestions %}
+      <button class="btn btn-sm" style="margin:3px 3px 3px 0;background:var(--surface);border:1px solid var(--border)" onclick="document.getElementById('msgInput').value='{{ entry.question|escapejs }}';sendMsg()">{{ entry.question|truncatechars:30 }}</button>
+      {% endfor %}
+      <p style="font-size:.78rem;color:var(--muted);margin-top:8px">Click to ask instantly</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const csrfToken = '{{ csrf_token }}';
+function addMsg(text, isBot) {
+  const box = document.getElementById('chatBox');
+  const d = document.createElement('div');
+  d.style.cssText = 'display:flex;' + (isBot ? '' : 'justify-content:flex-end');
+  const now = new Date().toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'});
+  d.innerHTML = `<div style="max-width:75%;padding:10px 14px;border-radius:${isBot?'4px 14px 14px 14px':'14px 4px 14px 14px'};background:${isBot?'var(--surface)':'var(--accent)'};font-size:.88rem;line-height:1.5">${text}<div style="font-size:.7rem;color:rgba(255,255,255,.4);margin-top:4px">${now}</div></div>`;
+  box.appendChild(d);
+  box.scrollTop = box.scrollHeight;
+}
+async function sendMsg() {
+  const inp = document.getElementById('msgInput');
+  const msg = inp.value.trim();
+  if (!msg) return;
+  inp.value = '';
+  addMsg(msg, false);
+  const thinking = document.createElement('div');
+  thinking.id = 'thinking';
+  thinking.style.cssText = 'display:flex';
+  thinking.innerHTML = '<div style="padding:10px 14px;background:var(--surface);border-radius:4px 14px 14px 14px;color:var(--muted);font-size:.85rem">🤖 Thinking…</div>';
+  document.getElementById('chatBox').appendChild(thinking);
+  const res = await fetch('/chat/api/', {method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':csrfToken},body:JSON.stringify({message:msg})});
+  const data = await res.json();
+  document.getElementById('thinking')?.remove();
+  addMsg(data.reply, true);
+}
+// scroll to bottom on load
+document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
+</script>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends 'core/base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="page-title">👋 Welcome, {{ user.get_full_name|default:user.username }}</div>
+
+<div class="stats">
+  <div class="stat"><div class="num">{{ stats.total }}</div><div class="lbl">Total Tickets</div></div>
+  <div class="stat"><div class="num" style="color:#6c63ff">{{ stats.open }}</div><div class="lbl">Open</div></div>
+  <div class="stat"><div class="num" style="color:#f9ca24">{{ stats.in_progress }}</div><div class="lbl">In Progress</div></div>
+  <div class="stat"><div class="num" style="color:#43e97b">{{ stats.resolved }}</div><div class="lbl">Resolved</div></div>
+</div>
+
+<div class="card">
+  <h3 style="margin-bottom:15px;color:#fff">Recent Tickets</h3>
+  {% if recent %}
+  <table>
+    <tr><th>Title</th><th>Priority</th><th>Status</th><th>Date</th></tr>
+    {% for t in recent %}
+    <tr>
+      <td>{{ t.title }}</td>
+      <td><span class="{{ t.priority }}">{{ t.get_priority_display }}</span></td>
+      <td><span class="badge {{ t.status }}">{{ t.get_status_display }}</span></td>
+      <td style="color:var(--muted);font-size:.8rem">{{ t.created_at|date:"M d, Y" }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p style="color:var(--muted)">No tickets yet. <a href="{% url 'chat' %}">Start a chat</a> or <a href="{% url 'tickets' %}">create a ticket</a>.</p>
+  {% endif %}
+</div>
+
+<div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:15px">
+  <div class="card" style="text-align:center;cursor:pointer" onclick="location.href='{% url 'chat' %}'">
+    <div style="font-size:2.5rem">💬</div>
+    <h3 style="margin-top:10px">Chat with Bot</h3>
+    <p style="color:var(--muted);font-size:.85rem;margin-top:5px">Get instant answers from our knowledge base</p>
+  </div>
+  <div class="card" style="text-align:center;cursor:pointer" onclick="location.href='{% url 'knowledge_base' %}'">
+    <div style="font-size:2.5rem">📚</div>
+    <h3 style="margin-top:10px">Knowledge Base</h3>
+    <p style="color:var(--muted);font-size:.85rem;margin-top:5px">Browse FAQs and predefined answers</p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}HelpDesk{% endblock %}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#0f1117;--surface:#1a1d27;--card:#22263a;--accent:#6c63ff;--accent2:#ff6584;--text:#e2e8f0;--muted:#8892b0;--border:#2d3250;--green:#43e97b;--yellow:#f9ca24;--red:#ff6b6b;--radius:10px}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;display:flex;min-height:100vh}
+  a{color:var(--accent);text-decoration:none}
+  .sidebar{width:220px;background:var(--surface);padding:20px 0;display:flex;flex-direction:column;border-right:1px solid var(--border);position:fixed;height:100vh;overflow-y:auto}
+  .sidebar .logo{padding:0 20px 20px;font-size:1.3rem;font-weight:700;color:#fff;border-bottom:1px solid var(--border);margin-bottom:10px}
+  .sidebar .logo span{color:var(--accent)}
+  .sidebar nav a{display:flex;align-items:center;gap:10px;padding:12px 20px;color:var(--muted);font-size:.9rem;transition:.2s}
+  .sidebar nav a:hover,.sidebar nav a.active{background:var(--card);color:#fff;border-right:3px solid var(--accent)}
+  .sidebar .user-info{margin-top:auto;padding:15px 20px;border-top:1px solid var(--border);font-size:.8rem;color:var(--muted)}
+  .sidebar .user-info strong{display:block;color:var(--text);margin-bottom:2px}
+  .sidebar .user-info .badge{background:var(--accent);color:#fff;padding:2px 8px;border-radius:20px;font-size:.7rem}
+  main{margin-left:220px;flex:1;padding:30px}
+  .page-title{font-size:1.6rem;font-weight:700;margin-bottom:25px;color:#fff}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:15px;margin-bottom:25px}
+  .stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center}
+  .stat .num{font-size:2rem;font-weight:700;color:var(--accent)}
+  .stat .lbl{font-size:.8rem;color:var(--muted);margin-top:4px}
+  btn,button,.btn{background:var(--accent);color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:.85rem;transition:.2s;display:inline-block}
+  button:hover,.btn:hover{opacity:.85}
+  .btn-sm{padding:5px 10px;font-size:.75rem}
+  .btn-danger{background:var(--red)}
+  .btn-success{background:var(--green);color:#000}
+  .btn-warn{background:var(--yellow);color:#000}
+  input,select,textarea{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:6px;width:100%;font-size:.9rem}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+  table{width:100%;border-collapse:collapse;font-size:.88rem}
+  th{text-align:left;padding:10px 12px;color:var(--muted);border-bottom:1px solid var(--border);font-weight:600}
+  td{padding:10px 12px;border-bottom:1px solid var(--border)}
+  tr:hover td{background:rgba(108,99,255,.06)}
+  .badge{padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600}
+  .open{background:#2d3250;color:#6c63ff}.in_progress{background:#2a2d1a;color:#f9ca24}.resolved{background:#1a2d1e;color:#43e97b}.closed{background:#2d1a1a;color:#ff6b6b}
+  .high{color:var(--red)}.urgent{color:var(--accent2)}.medium{color:var(--yellow)}.low{color:var(--green)}
+  .form-group{margin-bottom:14px}
+  .form-group label{display:block;font-size:.82rem;color:var(--muted);margin-bottom:5px}
+  .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center}
+  .modal.show{display:flex}
+  .modal-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:25px;width:min(500px,95vw);max-height:90vh;overflow-y:auto}
+  .modal-box h3{margin-bottom:18px;font-size:1.1rem}
+  .flash{padding:10px 15px;border-radius:6px;margin-bottom:15px;font-size:.88rem}
+  .flash.error{background:#2d1a1a;color:var(--red);border:1px solid var(--red)}
+  .row{display:flex;gap:15px}
+  .row>*{flex:1}
+  @media(max-width:768px){.sidebar{display:none}main{margin-left:0}}
+</style>
+</head>
+<body>
+{% if user.is_authenticated %}
+<aside class="sidebar">
+  <div class="logo">Help<span>Desk</span></div>
+  <nav>
+    <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">🏠 Dashboard</a>
+    <a href="{% url 'tickets' %}" class="{% if 'ticket' in request.resolver_match.url_name %}active{% endif %}">🎫 Tickets</a>
+    <a href="{% url 'chat' %}" class="{% if request.resolver_match.url_name == 'chat' %}active{% endif %}">💬 Chat Support</a>
+    <a href="{% url 'knowledge_base' %}" class="{% if 'kb' in request.resolver_match.url_name or 'knowledge' in request.resolver_match.url_name %}active{% endif %}">📚 Knowledge Base</a>
+    {% if user.role in 'admin,agent' %}
+    <a href="{% url 'analytics' %}" class="{% if request.resolver_match.url_name == 'analytics' %}active{% endif %}">📊 Analytics</a>
+    {% endif %}
+    {% if user.role == 'admin' %}
+    <a href="/admin/">⚙️ Admin Panel</a>
+    {% endif %}
+    <a href="{% url 'profile' %}" class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}">👤 Profile</a>
+    <a href="{% url 'logout' %}">🚪 Logout</a>
+  </nav>
+  <div class="user-info">
+    <strong>{{ user.get_full_name|default:user.username }}</strong>
+    <span class="badge">{{ user.role|title }}</span>
+  </div>
+</aside>
+{% endif %}
+<main>{% block content %}{% endblock %}</main>
+</body>
+</html>

@@ -1,0 +1,27 @@
+{% extends 'core/base.html' %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+<div class="page-title">👤 Profile</div>
+<div style="max-width:500px">
+  <div class="card">
+    <div style="text-align:center;margin-bottom:25px">
+      <div style="width:80px;height:80px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 12px">
+        {{ user.username.0|upper }}
+      </div>
+      <h2>{{ user.get_full_name|default:user.username }}</h2>
+      <span class="badge {% if user.role == 'admin' %}resolved{% elif user.role == 'agent' %}in_progress{% else %}open{% endif %}">{{ user.role|title }}</span>
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="row">
+        <div class="form-group"><label>First Name</label><input type="text" name="first_name" value="{{ user.first_name }}"></div>
+        <div class="form-group"><label>Last Name</label><input type="text" name="last_name" value="{{ user.last_name }}"></div>
+      </div>
+      <div class="form-group"><label>Email</label><input type="email" name="email" value="{{ user.email }}"></div>
+      <div class="form-group"><label>Bio</label><textarea name="bio" rows="3">{{ user.bio }}</textarea></div>
+      <div class="form-group"><label>New Password (leave blank to keep current)</label><input type="password" name="password"></div>
+      <button type="submit" class="btn">Save Changes</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

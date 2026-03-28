@@ -1,0 +1,60 @@
+{% extends 'core/base.html' %}
+{% block title %}Knowledge Base{% endblock %}
+{% block content %}
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:25px">
+  <div class="page-title" style="margin:0">📚 Knowledge Base</div>
+  {% if user.role in 'admin,agent' %}
+  <button class="btn" onclick="document.getElementById('addModal').classList.add('show')">+ Add FAQ</button>
+  {% endif %}
+</div>
+
+<!-- Search -->
+<form method="get" style="margin-bottom:20px;display:flex;gap:10px">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search FAQs…" style="max-width:400px">
+  <button class="btn" type="submit">Search</button>
+  {% if q %}<a href="{% url 'knowledge_base' %}" class="btn btn-danger">Clear</a>{% endif %}
+</form>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:15px">
+  {% for e in entries %}
+  <div class="card" style="position:relative">
+    <div style="font-weight:600;margin-bottom:8px;padding-right:60px">❓ {{ e.question }}</div>
+    <div style="color:var(--muted);font-size:.88rem;line-height:1.6">{{ e.answer }}</div>
+    {% if e.keywords %}
+    <div style="margin-top:10px">
+      {% for kw in e.keywords.split %}
+      <span style="background:var(--surface);border:1px solid var(--border);padding:2px 8px;border-radius:20px;font-size:.72rem;color:var(--muted);margin-right:4px">{{ kw }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% if user.role == 'admin' %}
+    <form method="post" action="{% url 'kb_delete' e.id %}" style="position:absolute;top:15px;right:15px" onsubmit="return confirm('Delete?')">
+      {% csrf_token %}<button class="btn btn-sm btn-danger">✕</button>
+    </form>
+    {% endif %}
+  </div>
+  {% empty %}
+  <div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:60px 0">
+    {% if q %}No results for "<strong>{{ q }}</strong>".{% else %}No FAQs yet. Add one!{% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Add Modal -->
+<div class="modal" id="addModal">
+  <div class="modal-box">
+    <h3>Add FAQ</h3>
+    <form method="post" action="{% url 'kb_create' %}">
+      {% csrf_token %}
+      <div class="form-group"><label>Question</label><input type="text" name="question" required></div>
+      <div class="form-group"><label>Answer</label><textarea name="answer" rows="4" required></textarea></div>
+      <div class="form-group"><label>Keywords (comma-separated)</label><input type="text" name="keywords" placeholder="e.g. password, reset, login"></div>
+      <div style="display:flex;gap:10px;margin-top:10px">
+        <button type="submit" class="btn">Save</button>
+        <button type="button" class="btn btn-danger" onclick="document.getElementById('addModal').classList.remove('show')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>window.onclick=function(e){if(e.target.classList.contains('modal'))e.target.classList.remove('show')}</script>
+{% endblock %}

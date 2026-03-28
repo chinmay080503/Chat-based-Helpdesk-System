@@ -1,0 +1,123 @@
+{% extends 'core/base.html' %}
+{% block title %}Tickets{% endblock %}
+{% block content %}
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:25px">
+  <div class="page-title" style="margin:0">🎫 Tickets</div>
+  <button class="btn" onclick="document.getElementById('createModal').classList.add('show')">+ New Ticket</button>
+</div>
+
+<!-- Filters -->
+<div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+  <form method="get" style="display:flex;gap:10px;flex-wrap:wrap">
+    <select name="status" onchange="this.form.submit()" style="width:auto">
+      <option value="">All Statuses</option>
+      <option value="open" {% if request.GET.status == 'open' %}selected{% endif %}>Open</option>
+      <option value="in_progress" {% if request.GET.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+      <option value="resolved" {% if request.GET.status == 'resolved' %}selected{% endif %}>Resolved</option>
+      <option value="closed" {% if request.GET.status == 'closed' %}selected{% endif %}>Closed</option>
+    </select>
+    <select name="priority" onchange="this.form.submit()" style="width:auto">
+      <option value="">All Priorities</option>
+      <option value="low" {% if request.GET.priority == 'low' %}selected{% endif %}>Low</option>
+      <option value="medium" {% if request.GET.priority == 'medium' %}selected{% endif %}>Medium</option>
+      <option value="high" {% if request.GET.priority == 'high' %}selected{% endif %}>High</option>
+      <option value="urgent" {% if request.GET.priority == 'urgent' %}selected{% endif %}>Urgent</option>
+    </select>
+  </form>
+</div>
+
+<div class="card">
+  <table>
+    <tr><th>#</th><th>Title</th><th>Priority</th><th>Status</th><th>Assigned To</th><th>Created</th><th>Actions</th></tr>
+    {% for t in tickets %}
+    <tr>
+      <td style="color:var(--muted)">#{{ t.id }}</td>
+      <td><strong>{{ t.title }}</strong><br><small style="color:var(--muted)">{{ t.description|truncatechars:60 }}</small></td>
+      <td><span class="{{ t.priority }}">{{ t.get_priority_display }}</span></td>
+      <td><span class="badge {{ t.status }}">{{ t.get_status_display }}</span></td>
+      <td>{{ t.assigned_to.username|default:"—" }}</td>
+      <td style="color:var(--muted);font-size:.8rem">{{ t.created_at|date:"M d, Y" }}</td>
+      <td>
+        <button class="btn btn-sm" onclick="openEdit({{ t.id }},'{{ t.status }}','{{ t.priority }}',{{ t.assigned_to.id|default:'null' }})">Edit</button>
+        {% if user.role == 'admin' %}
+        <form method="post" action="{% url 'delete_ticket' t.id %}" style="display:inline" onsubmit="return confirm('Delete?')">
+          {% csrf_token %}<button class="btn btn-sm btn-danger">Del</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">No tickets found.</td></tr>
+    {% endfor %}
+  </table>
+</div>
+
+<!-- Create Modal -->
+<div class="modal" id="createModal">
+  <div class="modal-box">
+    <h3>Create Ticket</h3>
+    <form method="post" action="{% url 'create_ticket' %}">
+      {% csrf_token %}
+      <div class="form-group"><label>Title</label><input type="text" name="title" required></div>
+      <div class="form-group"><label>Description</label><textarea name="description" rows="3" required></textarea></div>
+      <div class="row">
+        <div class="form-group"><label>Priority</label>
+          <select name="priority"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option><option value="urgent">Urgent</option></select>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:10px">
+        <button type="submit" class="btn">Create</button>
+        <button type="button" class="btn btn-danger" onclick="document.getElementById('createModal').classList.remove('show')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal" id="editModal">
+  <div class="modal-box">
+    <h3>Update Ticket</h3>
+    <form method="post" id="editForm">
+      {% csrf_token %}
+      <div class="form-group"><label>Status</label>
+        <select name="status" id="editStatus">
+          <option value="open">Open</option><option value="in_progress">In Progress</option>
+          <option value="resolved">Resolved</option><option value="closed">Closed</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Priority</label>
+        <select name="priority" id="editPriority">
+          <option value="low">Low</option><option value="medium">Medium</option>
+          <option value="high">High</option><option value="urgent">Urgent</option>
+        </select>
+      </div>
+      {% if user.role in 'admin,agent' %}
+      <div class="form-group"><label>Assign To</label>
+        <select name="assigned_to" id="editAgent">
+          <option value="">— Unassigned —</option>
+          {% for a in agents %}<option value="{{ a.id }}">{{ a.username }}</option>{% endfor %}
+        </select>
+      </div>
+      {% endif %}
+      <div style="display:flex;gap:10px;margin-top:10px">
+        <button type="submit" class="btn">Save</button>
+        <button type="button" class="btn btn-danger" onclick="document.getElementById('editModal').classList.remove('show')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openEdit(id, status, priority, agentId) {
+  document.getElementById('editForm').action = '/tickets/' + id + '/update/';
+  document.getElementById('editStatus').value = status;
+  document.getElementById('editPriority').value = priority;
+  var ag = document.getElementById('editAgent');
+  if (ag) ag.value = agentId || '';
+  document.getElementById('editModal').classList.add('show');
+}
+window.onclick = function(e) {
+  if (e.target.classList.contains('modal')) e.target.classList.remove('show');
+}
+</script>
+{% endblock %}
