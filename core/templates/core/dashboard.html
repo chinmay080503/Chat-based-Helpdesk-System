@@ -13,23 +13,42 @@
 <div class="card">
   <h3 style="margin-bottom:15px;color:#fff">Recent Tickets</h3>
   {% if recent %}
-  <table>
-    <tr><th>Title</th><th>Priority</th><th>Status</th><th>Date</th></tr>
+
+  <!-- Desktop table -->
+  <div class="table-wrap desk-only">
+    <table>
+      <tr><th>Title</th><th>Priority</th><th>Status</th><th>Date</th></tr>
+      {% for t in recent %}
+      <tr>
+        <td>{{ t.title }}</td>
+        <td><span class="{{ t.priority }}">{{ t.get_priority_display }}</span></td>
+        <td><span class="badge {{ t.status }}">{{ t.get_status_display }}</span></td>
+        <td style="color:var(--muted);font-size:.8rem">{{ t.created_at|date:"M d, Y" }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <!-- Mobile cards -->
+  <div class="mob-only">
     {% for t in recent %}
-    <tr>
-      <td>{{ t.title }}</td>
-      <td><span class="{{ t.priority }}">{{ t.get_priority_display }}</span></td>
-      <td><span class="badge {{ t.status }}">{{ t.get_status_display }}</span></td>
-      <td style="color:var(--muted);font-size:.8rem">{{ t.created_at|date:"M d, Y" }}</td>
-    </tr>
+    <div style="padding:12px 0;border-bottom:1px solid var(--border)">
+      <div style="font-weight:600;margin-bottom:6px;font-size:.9rem">{{ t.title }}</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span class="badge {{ t.status }}">{{ t.get_status_display }}</span>
+        <span class="{{ t.priority }}" style="font-size:.8rem">{{ t.get_priority_display }}</span>
+        <span style="color:var(--muted);font-size:.78rem;margin-left:auto">{{ t.created_at|date:"M d" }}</span>
+      </div>
+    </div>
     {% endfor %}
-  </table>
+  </div>
+
   {% else %}
   <p style="color:var(--muted)">No tickets yet. <a href="{% url 'chat' %}">Start a chat</a> or <a href="{% url 'tickets' %}">create a ticket</a>.</p>
   {% endif %}
 </div>
 
-<div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:15px">
+<div class="quick-cards" style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:15px">
   <div class="card" style="text-align:center;cursor:pointer" onclick="location.href='{% url 'chat' %}'">
     <div style="font-size:2.5rem">💬</div>
     <h3 style="margin-top:10px">Chat with Bot</h3>
@@ -41,4 +60,13 @@
     <p style="color:var(--muted);font-size:.85rem;margin-top:5px">Browse FAQs and predefined answers</p>
   </div>
 </div>
+
+<style>
+.mob-only{display:none}
+@media(max-width:768px){
+  .desk-only{display:none}
+  .mob-only{display:block}
+  .quick-cards{grid-template-columns:1fr!important}
+}
+</style>
 {% endblock %}

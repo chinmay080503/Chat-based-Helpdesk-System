@@ -1,22 +1,22 @@
 {% extends 'core/base.html' %}
 {% block title %}Tickets{% endblock %}
 {% block content %}
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:25px">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:25px;flex-wrap:wrap;gap:10px">
   <div class="page-title" style="margin:0">🎫 Tickets</div>
   <button class="btn" onclick="document.getElementById('createModal').classList.add('show')">+ New Ticket</button>
 </div>
 
 <!-- Filters -->
-<div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+<div style="margin-bottom:20px">
   <form method="get" style="display:flex;gap:10px;flex-wrap:wrap">
-    <select name="status" onchange="this.form.submit()" style="width:auto">
+    <select name="status" onchange="this.form.submit()" style="width:auto;flex:1;min-width:130px">
       <option value="">All Statuses</option>
       <option value="open" {% if request.GET.status == 'open' %}selected{% endif %}>Open</option>
       <option value="in_progress" {% if request.GET.status == 'in_progress' %}selected{% endif %}>In Progress</option>
       <option value="resolved" {% if request.GET.status == 'resolved' %}selected{% endif %}>Resolved</option>
       <option value="closed" {% if request.GET.status == 'closed' %}selected{% endif %}>Closed</option>
     </select>
-    <select name="priority" onchange="this.form.submit()" style="width:auto">
+    <select name="priority" onchange="this.form.submit()" style="width:auto;flex:1;min-width:130px">
       <option value="">All Priorities</option>
       <option value="low" {% if request.GET.priority == 'low' %}selected{% endif %}>Low</option>
       <option value="medium" {% if request.GET.priority == 'medium' %}selected{% endif %}>Medium</option>
@@ -26,30 +26,65 @@
   </form>
 </div>
 
-<div class="card">
-  <table>
-    <tr><th>#</th><th>Title</th><th>Priority</th><th>Status</th><th>Assigned To</th><th>Created</th><th>Actions</th></tr>
-    {% for t in tickets %}
-    <tr>
-      <td style="color:var(--muted)">#{{ t.id }}</td>
-      <td><strong>{{ t.title }}</strong><br><small style="color:var(--muted)">{{ t.description|truncatechars:60 }}</small></td>
-      <td><span class="{{ t.priority }}">{{ t.get_priority_display }}</span></td>
-      <td><span class="badge {{ t.status }}">{{ t.get_status_display }}</span></td>
-      <td>{{ t.assigned_to.username|default:"—" }}</td>
-      <td style="color:var(--muted);font-size:.8rem">{{ t.created_at|date:"M d, Y" }}</td>
-      <td>
+<!-- Desktop table -->
+<div class="card desk-only" style="padding:0;overflow:hidden">
+  <div class="table-wrap">
+    <table>
+      <tr><th>#</th><th>Title</th><th>Priority</th><th>Status</th><th>Assigned</th><th>Created</th><th>Actions</th></tr>
+      {% for t in tickets %}
+      <tr>
+        <td style="color:var(--muted)">#{{ t.id }}</td>
+        <td><strong>{{ t.title }}</strong><br><small style="color:var(--muted)">{{ t.description|truncatechars:50 }}</small></td>
+        <td><span class="{{ t.priority }}">{{ t.get_priority_display }}</span></td>
+        <td><span class="badge {{ t.status }}">{{ t.get_status_display }}</span></td>
+        <td>{{ t.assigned_to.username|default:"—" }}</td>
+        <td style="color:var(--muted);font-size:.8rem;white-space:nowrap">{{ t.created_at|date:"M d, Y" }}</td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-sm" onclick="openEdit({{ t.id }},'{{ t.status }}','{{ t.priority }}',{{ t.assigned_to.id|default:'null' }})">Edit</button>
+          {% if user.role == 'admin' %}
+          <form method="post" action="{% url 'delete_ticket' t.id %}" style="display:inline" onsubmit="return confirm('Delete?')">
+            {% csrf_token %}<button class="btn btn-sm btn-danger">Del</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">No tickets found.</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+
+<!-- Mobile ticket cards -->
+<div class="mob-only">
+  {% for t in tickets %}
+  <div class="card" style="margin-bottom:10px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px">
+      <div>
+        <div style="font-weight:600;font-size:.92rem">{{ t.title }}</div>
+        <div style="color:var(--muted);font-size:.78rem;margin-top:3px">#{{ t.id }} · {{ t.created_at|date:"M d, Y" }}</div>
+      </div>
+      <span class="badge {{ t.status }}" style="flex-shrink:0">{{ t.get_status_display }}</span>
+    </div>
+    <div style="color:var(--muted);font-size:.82rem;margin-bottom:10px">{{ t.description|truncatechars:80 }}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <div style="display:flex;gap:10px;align-items:center">
+        <span class="{{ t.priority }}" style="font-size:.8rem">{{ t.get_priority_display }}</span>
+        {% if t.assigned_to %}<span style="font-size:.78rem;color:var(--muted)">👤 {{ t.assigned_to.username }}</span>{% endif %}
+      </div>
+      <div style="display:flex;gap:6px">
         <button class="btn btn-sm" onclick="openEdit({{ t.id }},'{{ t.status }}','{{ t.priority }}',{{ t.assigned_to.id|default:'null' }})">Edit</button>
         {% if user.role == 'admin' %}
         <form method="post" action="{% url 'delete_ticket' t.id %}" style="display:inline" onsubmit="return confirm('Delete?')">
           {% csrf_token %}<button class="btn btn-sm btn-danger">Del</button>
         </form>
         {% endif %}
-      </td>
-    </tr>
-    {% empty %}
-    <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">No tickets found.</td></tr>
-    {% endfor %}
-  </table>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="card" style="text-align:center;color:var(--muted);padding:30px">No tickets found.</div>
+  {% endfor %}
 </div>
 
 <!-- Create Modal -->
@@ -60,12 +95,10 @@
       {% csrf_token %}
       <div class="form-group"><label>Title</label><input type="text" name="title" required></div>
       <div class="form-group"><label>Description</label><textarea name="description" rows="3" required></textarea></div>
-      <div class="row">
-        <div class="form-group"><label>Priority</label>
-          <select name="priority"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option><option value="urgent">Urgent</option></select>
-        </div>
+      <div class="form-group"><label>Priority</label>
+        <select name="priority"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option><option value="urgent">Urgent</option></select>
       </div>
-      <div style="display:flex;gap:10px;margin-top:10px">
+      <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
         <button type="submit" class="btn">Create</button>
         <button type="button" class="btn btn-danger" onclick="document.getElementById('createModal').classList.remove('show')">Cancel</button>
       </div>
@@ -99,13 +132,21 @@
         </select>
       </div>
       {% endif %}
-      <div style="display:flex;gap:10px;margin-top:10px">
+      <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
         <button type="submit" class="btn">Save</button>
         <button type="button" class="btn btn-danger" onclick="document.getElementById('editModal').classList.remove('show')">Cancel</button>
       </div>
     </form>
   </div>
 </div>
+
+<style>
+.mob-only{display:none}
+@media(max-width:768px){
+  .desk-only{display:none}
+  .mob-only{display:block}
+}
+</style>
 
 <script>
 function openEdit(id, status, priority, agentId) {

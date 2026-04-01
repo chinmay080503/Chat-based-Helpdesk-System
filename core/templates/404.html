@@ -4,136 +4,81 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>404 – Page Not Found | HelpDesk</title>
-
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#0f1117;--surface:#1a1d27;--card:#22263a;--accent:#6c63ff;--accent2:#ff6584;--text:#e2e8f0;--muted:#8892b0;--border:#2d3250;--radius:10px}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;display:flex;min-height:100vh}
+  a{color:var(--accent);text-decoration:none}
 
-:root{
-  --bg:#0f1117;
-  --surface:#1a1d27;
-  --card:#22263a;
-  --accent:#6c63ff;
-  --accent2:#ff6584;
-  --text:#e2e8f0;
-  --muted:#8892b0;
-  --border:#2d3250;
-  --radius:10px
-}
+  /* Topbar mobile */
+  .topbar{display:none;position:fixed;top:0;left:0;right:0;height:54px;background:var(--surface);border-bottom:1px solid var(--border);z-index:150;align-items:center;padding:0 16px;gap:14px}
+  .topbar .logo{font-size:1.1rem;font-weight:700;color:#fff;flex:1}
+  .topbar .logo span{color:var(--accent)}
+  .hamburger{background:none;border:none;color:var(--text);font-size:1.4rem;cursor:pointer;padding:4px}
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:190}
+  .overlay.show{display:block}
 
-body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:'Segoe UI',system-ui,sans-serif;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  min-height:100vh;
-}
+  .sidebar{width:220px;background:var(--surface);padding:20px 0;display:flex;flex-direction:column;border-right:1px solid var(--border);position:fixed;height:100vh;overflow-y:auto;z-index:200;transition:transform .25s ease}
+  .sidebar .logo{padding:0 20px 20px;font-size:1.3rem;font-weight:700;color:#fff;border-bottom:1px solid var(--border);margin-bottom:10px}
+  .sidebar .logo span{color:var(--accent)}
+  .sidebar nav a{display:flex;align-items:center;gap:10px;padding:12px 20px;color:var(--muted);font-size:.9rem;transition:.2s}
+  .sidebar nav a:hover{background:var(--card);color:#fff;border-right:3px solid var(--accent)}
 
-main{
-  width:100%;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
+  main{margin-left:220px;flex:1;padding:30px;display:flex;align-items:center;justify-content:center}
+  .wrapper{width:100%;max-width:520px}
+  .error-num{font-size:clamp(80px,15vw,130px);font-weight:700;line-height:1;color:var(--accent);text-shadow:0 0 40px rgba(108,99,255,.35);letter-spacing:-4px;margin-bottom:6px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:30px;margin-top:20px}
+  .card-header{display:flex;align-items:center;gap:14px;padding-bottom:20px;border-bottom:1px solid var(--border);margin-bottom:22px}
+  .icon-box{width:48px;height:48px;background:rgba(108,99,255,.15);border:1px solid rgba(108,99,255,.3);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+  .card-header h1{font-size:1.25rem;font-weight:700;color:#fff;margin-bottom:3px}
+  .card-header p{font-size:.82rem;color:var(--muted)}
+  .url-row{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 14px;margin-bottom:22px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .url-label{font-size:.72rem;color:var(--muted);white-space:nowrap;flex-shrink:0}
+  .url-val{font-size:.82rem;color:var(--accent2);font-family:monospace;word-break:break-all}
+  .btn-row{display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap}
+  .btn{background:var(--accent);color:#fff;border:none;padding:9px 18px;border-radius:6px;cursor:pointer;font-size:.85rem;transition:.2s;display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-weight:500}
+  .btn:hover{opacity:.85}
+  .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+  .btn-outline:hover{border-color:var(--accent);color:var(--accent);opacity:1}
+  .shortcuts{padding-top:18px;border-top:1px solid var(--border)}
+  .shortcuts-label{font-size:.75rem;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:7px 13px;font-size:.8rem;color:var(--muted);text-decoration:none;transition:.2s;display:flex;align-items:center;gap:6px}
+  .chip:hover{border-color:var(--accent);color:#fff}
 
-.wrapper{
-  width:100%;
-  max-width:520px;
-  text-align:center;
-}
-
-.error-num{
-  font-size:clamp(80px,15vw,130px);
-  font-weight:700;
-  color:var(--accent);
-  text-shadow:0 0 40px rgba(108,99,255,.35);
-  letter-spacing:-4px;
-}
-
-.card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  padding:30px;
-  margin-top:20px;
-  text-align:left;
-}
-
-.card-header{
-  display:flex;
-  align-items:center;
-  gap:14px;
-  margin-bottom:20px;
-}
-
-.icon-box{
-  width:48px;height:48px;
-  background:rgba(108,99,255,.15);
-  border:1px solid rgba(108,99,255,.3);
-  border-radius:10px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.url-row{
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:6px;
-  padding:10px;
-  margin:20px 0;
-  font-size:.85rem;
-}
-
-.btn-row{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-.btn{
-  background:var(--accent);
-  color:#fff;
-  padding:8px 16px;
-  border-radius:6px;
-  text-decoration:none;
-}
-
-.btn-outline{
-  border:1px solid var(--border);
-  color:var(--text);
-}
-
-.shortcuts{
-  margin-top:20px;
-}
-
-.chips{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-}
-
-.chip{
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:6px;
-  padding:6px 12px;
-  font-size:.8rem;
-  text-decoration:none;
-  color:var(--muted);
-}
+  @media(max-width:768px){
+    .sidebar{transform:translateX(-100%)}
+    .sidebar.open{transform:translateX(0)}
+    .topbar{display:flex}
+    main{margin-left:0;padding:70px 16px 20px;align-items:flex-start}
+    .btn-row .btn{flex:1;justify-content:center}
+  }
 </style>
 </head>
-
 <body>
+
+<div class="topbar">
+  <button class="hamburger" onclick="toggleSidebar()">☰</button>
+  <div class="logo">Help<span>Desk</span></div>
+</div>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="logo">Help<span>Desk</span></div>
+  <nav>
+    <a href="/dashboard/" onclick="closeSidebar()">🏠 Dashboard</a>
+    <a href="/tickets/" onclick="closeSidebar()">🎫 Tickets</a>
+    <a href="/chat/" onclick="closeSidebar()">💬 Chat Support</a>
+    <a href="/kb/" onclick="closeSidebar()">📚 Knowledge Base</a>
+    <a href="/analytics/" onclick="closeSidebar()">📊 Analytics</a>
+    <a href="/profile/" onclick="closeSidebar()">👤 Profile</a>
+    <a href="/logout/">🚪 Logout</a>
+  </nav>
+</aside>
 
 <main>
   <div class="wrapper">
-
     <div class="error-num">404</div>
-
     <div class="card">
       <div class="card-header">
         <div class="icon-box">🔍</div>
@@ -142,28 +87,37 @@ main{
           <p>This page doesn't exist or has been moved</p>
         </div>
       </div>
-
       <div class="url-row">
-        Requested URL: {{ request.path }}
+        <span class="url-label">Requested URL</span>
+        <span class="url-val">{{ request.path }}</span>
       </div>
-
       <div class="btn-row">
-        <a href="/dashboard/" class="btn">🏠 Dashboard</a>
-        <a href="javascript:history.back()" class="btn btn-outline">← Back</a>
+        <a href="/dashboard/" class="btn">🏠 Go to Dashboard</a>
+        <a href="javascript:history.back()" class="btn btn-outline">← Go Back</a>
       </div>
-
       <div class="shortcuts">
-        <p style="margin-bottom:10px;">Quick Navigation</p>
+        <div class="shortcuts-label">Quick Navigation</div>
         <div class="chips">
           <a href="/tickets/" class="chip">🎫 Tickets</a>
           <a href="/chat/" class="chip">💬 Chat</a>
           <a href="/kb/" class="chip">📚 Knowledge Base</a>
+          <a href="/analytics/" class="chip">📊 Analytics</a>
+          <a href="/profile/" class="chip">👤 Profile</a>
         </div>
       </div>
     </div>
-
   </div>
 </main>
 
+<script>
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+</script>
 </body>
 </html>
