@@ -130,29 +130,19 @@ def chat_api(request):
 
     Message.objects.create(sender=request.user, content=user_msg, is_bot=False)
 
-    # Bot: search KB — ignore stop words, require whole-word matches, min threshold
-    import re
-    STOP_WORDS = {'a','an','the','is','it','in','on','at','to','do','my','me','we',
-                  'he','she','they','you','of','or','and','for','are','was','be',
-                  'by','so','if','as','up','but','not','can','has','had','how',
-                  'why','what','when','where','who','which','this','that','with',
-                  'from','have','will','its','about','please','help','i'}
-    words = [w for w in re.findall(r'[a-z]+', user_msg.lower())
-             if w not in STOP_WORDS and len(w) > 2]
-
+    # Bot: match user message against KB questions using similarity (not keywords)
+    from difflib import SequenceMatcher
     kb_entries = KnowledgeBase.objects.all()
     best, best_score = None, 0
+    user_lower = user_msg.lower().strip('?. ')
     for entry in kb_entries:
-        q_kw = (entry.question + ' ' + entry.keywords).lower()
-        ans   = entry.answer.lower()
-        # question/keyword match = 2pts each, answer match = 1pt each (whole words only)
-        score  = sum(2 for w in words if re.search(r'\b' + re.escape(w) + r'\b', q_kw))
-        score += sum(1 for w in words if re.search(r'\b' + re.escape(w) + r'\b', ans))
-        if score > best_score:
-            best, best_score = entry, score
+        q_lower = entry.question.lower().strip('?. ')
+        ratio = SequenceMatcher(None, user_lower, q_lower).ratio()
+        if ratio > best_score:
+            best, best_score = entry, ratio
 
-    # Require at least 2 points to avoid false positives on unrelated messages
-    if best and best_score >= 2:
+    # Threshold: 0.6 means ~60% similar — catches paraphrasing but rejects unrelated
+    if best and best_score >= 0.6:
         bot_text = f"📚 {best.answer}"
         ticket_created = False
     else:

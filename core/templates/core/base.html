@@ -55,7 +55,7 @@
 <body>
 {% if user.is_authenticated %}
 <aside class="sidebar">
-  <div class="logo">Help<span>Desk</span></div>
+  <div class="logo">Assist<span>Flow</span></div>
   <nav>
     <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">🏠 Dashboard</a>
     <a href="{% url 'tickets' %}" class="{% if 'ticket' in request.resolver_match.url_name %}active{% endif %}">🎫 Tickets</a>

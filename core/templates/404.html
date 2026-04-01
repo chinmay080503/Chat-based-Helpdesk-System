@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>404 – Page Not Found | HelpDesk</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#0f1117;
+  --surface:#1a1d27;
+  --card:#22263a;
+  --accent:#6c63ff;
+  --accent2:#ff6584;
+  --text:#e2e8f0;
+  --muted:#8892b0;
+  --border:#2d3250;
+  --radius:10px
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Segoe UI',system-ui,sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+}
+
+main{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.wrapper{
+  width:100%;
+  max-width:520px;
+  text-align:center;
+}
+
+.error-num{
+  font-size:clamp(80px,15vw,130px);
+  font-weight:700;
+  color:var(--accent);
+  text-shadow:0 0 40px rgba(108,99,255,.35);
+  letter-spacing:-4px;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:30px;
+  margin-top:20px;
+  text-align:left;
+}
+
+.card-header{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin-bottom:20px;
+}
+
+.icon-box{
+  width:48px;height:48px;
+  background:rgba(108,99,255,.15);
+  border:1px solid rgba(108,99,255,.3);
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.url-row{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:10px;
+  margin:20px 0;
+  font-size:.85rem;
+}
+
+.btn-row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.btn{
+  background:var(--accent);
+  color:#fff;
+  padding:8px 16px;
+  border-radius:6px;
+  text-decoration:none;
+}
+
+.btn-outline{
+  border:1px solid var(--border);
+  color:var(--text);
+}
+
+.shortcuts{
+  margin-top:20px;
+}
+
+.chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.chip{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:6px 12px;
+  font-size:.8rem;
+  text-decoration:none;
+  color:var(--muted);
+}
+</style>
+</head>
+
+<body>
+
+<main>
+  <div class="wrapper">
+
+    <div class="error-num">404</div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="icon-box">🔍</div>
+        <div>
+          <h1>Page Not Found</h1>
+          <p>This page doesn't exist or has been moved</p>
+        </div>
+      </div>
+
+      <div class="url-row">
+        Requested URL: {{ request.path }}
+      </div>
+
+      <div class="btn-row">
+        <a href="/dashboard/" class="btn">🏠 Dashboard</a>
+        <a href="javascript:history.back()" class="btn btn-outline">← Back</a>
+      </div>
+
+      <div class="shortcuts">
+        <p style="margin-bottom:10px;">Quick Navigation</p>
+        <div class="chips">
+          <a href="/tickets/" class="chip">🎫 Tickets</a>
+          <a href="/chat/" class="chip">💬 Chat</a>
+          <a href="/kb/" class="chip">📚 Knowledge Base</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+</body>
+</html>
