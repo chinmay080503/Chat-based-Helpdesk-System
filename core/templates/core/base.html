@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{% block title %}HelpDesk{% endblock %}</title>
+<title>{% block title %}AssistFlow{% endblock %}</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   :root{--bg:#0f1117;--surface:#1a1d27;--card:#22263a;--accent:#6c63ff;--accent2:#ff6584;--text:#e2e8f0;--muted:#8892b0;--border:#2d3250;--green:#43e97b;--yellow:#f9ca24;--red:#ff6b6b;--radius:10px}
@@ -86,12 +86,12 @@
 <!-- Mobile topbar -->
 <div class="topbar">
   <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">☰</button>
-  <div class="logo">Help<span>Desk</span></div>
+  <div class="logo">Assist<span>Flow</span></div>
 </div>
 <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
 <aside class="sidebar" id="sidebar">
-  <div class="logo">Help<span>Desk</span></div>
+  <div class="logo">Assist<span>Flow</span></div>
   <nav>
     <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" onclick="closeSidebar()">🏠 Dashboard</a>
     <a href="{% url 'tickets' %}" class="{% if 'ticket' in request.resolver_match.url_name %}active{% endif %}" onclick="closeSidebar()">🎫 Tickets</a>
